@@ -1,8 +1,9 @@
-from PySide6 import QtWidgets, QtGui, QtCore
+from PySide6 import QtWidgets, QtGui, QtCore, QtWebEngineWidgets, QtWebEngineCore
 from configparser import ConfigParser
 from src.config_setup import get_config, get_last_directory, update_last_directory
 import ctypes
 import sys
+from pydub import AudioSegment
 
 from assets.ui.main_window_ui import Ui_MainWindow
 
@@ -14,16 +15,56 @@ class AudioConverter(QtWidgets.QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.set_config()
+        self.actionGet_FFmpeg_codecs.setIcon(QtGui.QPixmap("assets/images/icon.png"))
 
         self.open_but.clicked.connect(self.open_file)
         self.convert_but.clicked.connect(self.convert_file)
+        self.actionGet_FFmpeg_codecs.triggered.connect(self.get_codecs)
 
 
     def open_file(self):
-        pass
+        folder_path = get_last_directory(self.config)
+        file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Select source audio file to convert', folder_path, '*.mp3;*.wav;*.flac;*.m4a;*.opus')[0]
+        if not file_path:
+            return
+        
+        update_last_directory(self.config, file_path)
+
+        self.path_line_edit.setText(file_path)
 
     def convert_file(self):
-        pass
+        if not self.path_line_edit.text():
+            return
+        
+        folder_path = get_last_directory(self.config)
+        file_path = QtWidgets.QFileDialog.getSaveFileName(self, 'Select output for converted file', folder_path, '*.mp3;*.wav;*.flac;*.m4a;*.opus')[0]
+        if not file_path:
+            return
+        
+        update_last_directory(self.config, file_path)
+        
+        audio = AudioSegment.from_file(self.path_line_edit.text(), format="wav")
+        audio.export(file_path, format="mp3")
+
+    def get_codecs(self):
+        self.browser = QtWebEngineWidgets.QWebEngineView()
+        self.profile = QtWebEngineCore.QWebEngineProfile.defaultProfile()
+
+        def download_requested(download):
+            folder_path = get_last_directory(self.config)
+            download_dir = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Download Directory', folder_path)
+            if download_dir:
+                update_last_directory(self.config, download_dir)
+                full_path = QtCore.QDir(download_dir).filePath(download.downloadFileName())
+                download.setDownloadFileName(full_path)
+                download.accept()
+            else:
+                download.cancel()
+
+        self.profile.downloadRequested.connect(download_requested)
+        self.browser.setUrl(QtCore.QUrl("https://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/"))
+        self.browser.resize(1200, 800) 
+        self.browser.show()
 
     def set_config(self, config: ConfigParser = None) -> None:
         if config is None:

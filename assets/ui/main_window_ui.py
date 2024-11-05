@@ -11,19 +11,22 @@
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
+    QCursor, QFont, QFontDatabase, QGradient,
+    QIcon, QImage, QKeySequence, QLinearGradient,
+    QPainter, QPalette, QPixmap, QRadialGradient,
+    QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QGridLayout, QLineEdit,
-    QMainWindow, QMenuBar, QPushButton, QSizePolicy,
-    QStatusBar, QVBoxLayout, QWidget)
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QSizePolicy, QStatusBar, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(600, 150)
+        self.actionGet_FFmpeg_codecs = QAction(MainWindow)
+        self.actionGet_FFmpeg_codecs.setObjectName(u"actionGet_FFmpeg_codecs")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -79,10 +82,15 @@ class Ui_MainWindow(object):
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
         self.menubar.setGeometry(QRect(0, 0, 600, 22))
+        self.menuMenu = QMenu(self.menubar)
+        self.menuMenu.setObjectName(u"menuMenu")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
+
+        self.menubar.addAction(self.menuMenu.menuAction())
+        self.menuMenu.addAction(self.actionGet_FFmpeg_codecs)
 
         self.retranslateUi(MainWindow)
 
@@ -91,6 +99,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Audio Converter", None))
+        self.actionGet_FFmpeg_codecs.setText(QCoreApplication.translate("MainWindow", u"Get FFmpeg codecs", None))
         self.convert_but.setText(QCoreApplication.translate("MainWindow", u"Convert", None))
         self.open_but.setText(QCoreApplication.translate("MainWindow", u"Open File...", None))
         self.format_combo.setItemText(0, QCoreApplication.translate("MainWindow", u"MP3", None))
@@ -104,5 +113,6 @@ class Ui_MainWindow(object):
         self.comboBox.setItemText(3, QCoreApplication.translate("MainWindow", u"96kb/s", None))
         self.comboBox.setItemText(4, QCoreApplication.translate("MainWindow", u"64kb/s", None))
 
+        self.menuMenu.setTitle(QCoreApplication.translate("MainWindow", u"Menu", None))
     # retranslateUi
 
