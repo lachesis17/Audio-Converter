@@ -21,19 +21,26 @@ class AudioConverter(QtWidgets.QMainWindow, Ui_MainWindow):
         self.convert_but.clicked.connect(self.convert_file)
         self.actionGet_FFmpeg_codecs.triggered.connect(self.get_codecs)
 
+        self.current_file = {}
+
 
     def open_file(self):
         folder_path = get_last_directory(self.config)
-        file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Select source audio file to convert', folder_path, '*.mp3;*.wav;*.flac;*.m4a;*.opus')[0]
-        if not file_path:
+        file_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Select source audio file to convert', folder_path, '*.mp3;*.wav;*.flac;*.m4a;*.opus')
+        if not file_path[0]:
             return
         
-        update_last_directory(self.config, file_path)
+        update_last_directory(self.config, file_path[0])
 
-        self.path_line_edit.setText(file_path)
+        self.current_file = {
+            'file': file_path[0],
+            'ext': file_path[0].split(".", 1)[-1]
+        }
+
+        self.path_line_edit.setText(file_path[0].split("/", 1)[-1])
 
     def convert_file(self):
-        if not self.path_line_edit.text():
+        if not self.current_file:
             return
         
         folder_path = get_last_directory(self.config)
@@ -43,8 +50,8 @@ class AudioConverter(QtWidgets.QMainWindow, Ui_MainWindow):
         
         update_last_directory(self.config, file_path)
         
-        audio = AudioSegment.from_file(self.path_line_edit.text(), format="wav")
-        audio.export(file_path, format="mp3")
+        audio = AudioSegment.from_file(self.current_file.get('file'), format=self.current_file.get('ext'))
+        audio.export(file_path, format=self.format_combo.currentText().lower())
 
     def get_codecs(self):
         self.browser = QtWebEngineWidgets.QWebEngineView()
